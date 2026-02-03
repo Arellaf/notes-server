@@ -30,17 +30,14 @@ const getNoteById = async (req, res) => {
   try {
     const note = await Note.findById(req.params.id);
 
-    //якщо нотатку не знайдено
     if (!note) {
       return res.status(404).json({ message: "Note not found" });
     }
 
-    //перевірка власника
     if (note.user.toString() !== req.user.userId) {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    //повертаємо нотатку
     res.json(note);
   } catch (error) {
     res.status(500).json({ message: "Server error" });
@@ -53,27 +50,31 @@ const updateNote = async (req, res) => {
 
     const note = await Note.findById(req.params.id);
 
-    //якщо не знайдено
     if (!note) {
       return res.status(404).json({ message: "Note not found" });
     }
 
-    //перевірка власника
     if (note.user.toString() !== req.user.userId) {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    //оновлення полів
-    if (title) note.title = title;
-    if (content) note.content = content;
+    if (title !== undefined) {
+      note.title = title;
+    }
+
+    if (content !== undefined) {
+      note.content = content;
+    }
 
     await note.save();
 
     res.json(note);
   } catch (error) {
+    console.error("UPDATE NOTE ERROR:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 const deleteNote = async (req, res) => {
   try {
@@ -95,4 +96,4 @@ const deleteNote = async (req, res) => {
   }
 };
 
-module.exports = { createNote, getNotes, getNoteById, updateNote, deleteNote};
+module.exports = { createNote, getNotes, getNoteById, updateNote, deleteNote };

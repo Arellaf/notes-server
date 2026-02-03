@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const {generateAccessToken, generateRefreshToken} = require("../utils/token");
 
 const register = async (req, res) => {
   try {
@@ -30,11 +31,6 @@ const register = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
-const {
-  generateAccessToken,
-  generateRefreshToken,
-} = require("../utils/token");
 
 const login = async (req, res) => {
   const { email, password } = req.body;
@@ -106,4 +102,21 @@ const me = async (req, res) => {
   }
 };
 
-module.exports = { register, login, me, refresh };
+
+const logout = async (req, res) => {
+  try {
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: false, // поміняти на true 
+      sameSite: "strict",
+    });
+
+    res.json({ message: "Logged out successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+module.exports = { register, login, me, refresh, logout };
+
+
