@@ -18,6 +18,18 @@ const register = async (req, res) => {
       return res.status(400).json(renderUserMessage("All fields required"));
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      return res.status(400).json(renderUserMessage("Invalid email format"));
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json(
+        renderUserMessage("Password must be at least 6 characters")
+      );
+    }
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json(renderUserMessage("User already exists"));
@@ -57,11 +69,11 @@ const login = async (req, res) => {
     res
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        secure: true, 
+        secure: true,
         sameSite: "strict",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
-      .json(renderLoginSuccess(accessToken, user)); 
+      .json(renderLoginSuccess(accessToken, user));
   } catch (error) {
     res.status(500).json(renderUserMessage("Server error"));
   }
@@ -84,7 +96,7 @@ const refresh = async (req, res) => {
 
     const newAccessToken = generateAccessToken(user);
 
-    res.json(renderRefreshSuccess(newAccessToken)); 
+    res.json(renderRefreshSuccess(newAccessToken));
   } catch (error) {
     return res.status(401).json(renderUserMessage("Invalid refresh token"));
   }
@@ -98,7 +110,7 @@ const me = async (req, res) => {
       return res.status(404).json(renderUserMessage("User not found"));
     }
 
-    res.json(renderUser(user)); 
+    res.json(renderUser(user));
   } catch (error) {
     res.status(500).json(renderUserMessage("Server error"));
   }
@@ -108,7 +120,7 @@ const logout = async (req, res) => {
   try {
     res.clearCookie("refreshToken", {
       httpOnly: true,
-      secure: true, 
+      secure: true,
       sameSite: "strict",
     });
 
